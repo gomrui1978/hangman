@@ -1,0 +1,5 @@
+#canvas {
+    width: 100%;
+    border: solid 0px blue;
+    object-fit: contain;  
+}

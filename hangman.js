@@ -10,11 +10,14 @@ var numErrores=0;
 const MaxErrores=6;
 const teclado ="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+document.addEventListener('keydown', (event) => {
+    var keyValue = event.key;
+    keyValue=keyValue.toUpperCase();
+    checkTecla(keyValue);
+  }, false);
 
 
-function textoResultadogg(){
-    return ""
-}
+
 //creacion de canvas
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -48,6 +51,21 @@ divResultados.appendChild(textoResultado);
 divResultados.appendChild(textoErrores);
 divResultados.appendChild(textoMaxErrores);
 
+//creacion de ventana modal
+const ventanaModal = document.createElement("div");
+ventanaModal.className="modal";
+ventanaModal.id="ventanaModal"
+document.body.appendChild(ventanaModal);
+const divModal = document.createElement("div");
+divModal.className="contenido-modal";
+ventanaModal.appendChild(divModal);
+const resumen = document.createElement("p");
+resumen.textContent="";
+divModal.appendChild(resumen);
+const botonReset=document.createElement("button");
+botonReset.textContent = "Try Again";
+botonReset.addEventListener("click", () => resetgame());
+divModal.appendChild(botonReset);
 
 //creacion de botones de teclado
 const divBotones = document.createElement("div");
@@ -55,14 +73,32 @@ document.body.appendChild(divBotones);
 for (letra of teclado){
     const boton = document.createElement("button");
     boton.textContent = letra;
+    boton.id=letra;
+    boton.className="botonLetra"
     boton.addEventListener("click", () => checkTecla(boton.textContent));
     divBotones.appendChild(boton);
 }
 
 
+function resetgame(){
+    numErrores=0;
+    textsecret="*".repeat(texto.length);
+    palabra.textContent=textsecret;
+    textoErrores.textContent=numErrores;
+    resumen.textContent="";
+    for (letra of teclado){
+        const botonLetra = document.getElementById(letra);
+        botonLetra.disabled = false;
+    }
+    UpdateDibujo();
+    ventanaModal.style.display = "none";
+}
+
 function checkTecla(tecla){
     let encontrado=false;
     let texto2Array = textsecret.split('');
+    const botonLetra = document.getElementById(tecla);
+    botonLetra.disabled = true;
 
     for (let i = 0; i < texto.length; i++){
         if (texto[i]==tecla){
@@ -73,48 +109,24 @@ function checkTecla(tecla){
     }
     textsecret = texto2Array.join('');
     palabra.textContent=textsecret;
-    letrasPorAdivinar=texto.split('_').length - 1;
-    if (textsecret.includes("*")==false) {
-        alert("You win. Try again");
-        numErrores=0;
-        textsecret="*".repeat(texto.length);
-        palabra.textContent=textsecret;
-        textoErrores.textContent=numErrores;
+    letrasPorAdivinar=texto.split('*').length - 1;
+    if (textsecret.includes("*")==false) { 
+        ventanaModal.style.display = "block";
+        resumen.textContent="You win";
     }
 
     if (encontrado===false){
         numErrores+=1;
         textoErrores.textContent=numErrores;
         UpdateDibujo();
-        if (numErrores==6){
-            alert("You lose. Try again");
-            numErrores=0;
-            textsecret="*".repeat(texto.length);
-            palabra.textContent=textsecret;
-            textoErrores.textContent=numErrores;
+        if (numErrores==6){            
+            ventanaModal.style.display = "block";
+            resumen.textContent="You lose";
         }
     }
     UpdateDibujo();
 
 }
-
-
-function iniciar(){
-      canvas=document.getElementById('canvas');
-      ctx=canvas.getContext('2d');
-      canvas.width=drawWidtht;
-      canvas.height=drawHeight;
-      //cruzcentral(canvas,ctx);
-      dibujarHorca();
-      dibujarCabeza();
-      dibujarTronco();
-      dibujarBrazoI();
-      dibujarBrazoD();
-      dibujarPiernaI();
-      dibujarPiernaD();
-      //PintaTexto(canvas1,ctx1,"hola", canvas1.width/2, canvas1.height/2,`50px arial`,"#000000","center","middle");
-}
-//window.addEventListener("load", iniciar, false);
 
 
 
@@ -142,10 +154,7 @@ function UpdateDibujo() {
             dibujarPiernaD();
             break;
     }
-    
 }
-
-
 
 function dibujarHorca() {
     ctx.clearRect(0, 0, drawWidtht, drawHeight);
